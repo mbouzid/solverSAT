@@ -64,49 +64,8 @@ std::string Solver::Robinson (Clauses & S)
 		std::cout << "A=" << A << std::endl;
 		std::cout << "B=" << B << std::endl;
 	
-		Clause result;
-		for (auto a : A)
-		{
-			auto conjugateLiteral = [&a] (const Literal & b)
-			{
-				return ( a.isConjugate (b) );
-			};
-	
-
-			auto findConjugateLiteral = std::find_if (B.begin(), B.end(), conjugateLiteral);
-			
-			if ( findConjugateLiteral != B.end() )
-			{
-				std::cout << "find: " << *findConjugateLiteral << std::endl; 
-			}
-			else
-			{
-				result.insert (a);
-			}
-
-		}
-
-		for (auto b: B)
-		{
-			auto conjugateLiteral = [&b] (const Literal & a)
-			{
-				return ( b.isConjugate (a) );
-			};
-	
-
-			auto findConjugateLiteral = std::find_if (A.begin(), A.end(), conjugateLiteral);
-			
-			if ( findConjugateLiteral != A.end() )
-			{
-				std::cout << "find: " << *findConjugateLiteral << std::endl; 
-			}
-			else
-			{
-				result.insert (b);
-			}	
-		}
-
-
+		Clause result (A*B);
+		
 		std::cout << "res=" << result << std::endl;
 		resolvents.insert(result);
 			

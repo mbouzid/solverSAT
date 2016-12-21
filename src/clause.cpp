@@ -53,14 +53,14 @@ Clause Clause::operator *(const Clause & c)
 	for (const Literal & l : c)
 	{ 
 		Literal _l (*l);
-		if ( (c.contains (l) and res.contains (_l)) or (c.contains (_l) and res.contains (l)))
+		if ( (c.contains (l) and res.contains (_l)))
 		{
-			res.erase (_l);
-			res.erase (l);
+			res-=_l;
 		}
 		else 
-			res.insert (l);
+			res+=l;
 	}
+
 	return res;
 }
 

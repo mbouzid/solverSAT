@@ -16,9 +16,21 @@ OBJ				=	obj/main.o \
 					obj/clauses.o 
 ## 
 
-all:	$(TGT)
+
+all:	dir $(TGT)
 	@echo ":)"
 
+
+dir: build obj 
+	if [ ! -d obj ] ;\
+	then\
+		mkdir obj;\
+	fi;\
+	if [ ! -d build ];\
+	then\
+		mkdir build;\
+	fi\
+	
 ##
 
 $(TGT):	$(OBJ)

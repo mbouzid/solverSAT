@@ -4,8 +4,7 @@ Solver SAT basé sur la méthode de Davis, Logemann et Loveland; inclu la résol
 ### Installation
 
 ```
-mkdir obj
-make
+make -s
 ```
 
 ### Utilisation

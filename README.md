@@ -3,23 +3,23 @@ Solver SAT basé sur la méthode de Davis, Logemann et Loveland; inclu la résol
 
 ### Installation
 
-```
+`
 make -s
-```
+`
 
 ### Utilisation
 
 Appliquer la résolvante de Robinson:
 
-```
+`
 ./build/solver [.dimacs] --rr 
-```
+`
 
 Appliquer DLL: 
 
-```
+`
 ./build/solver [.dimacs] --dll
-`̀``
+`
 
 
 ### Améliorations

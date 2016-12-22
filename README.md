@@ -34,7 +34,7 @@ Appliquer DLL:
 
 ### Améliorations
 
-* Etape de grouding 
+* Etape de grounding 
 * Résolvante de Robinson :
 	* heuristique pour la recherche des clauses à réduire
 	* parallélisation 

@@ -21,10 +21,21 @@ Appliquer DLL:
 ./build/solver [.dimacs] --dll
 `
 
+### Exemples
+
+* SAT
+	* examples/r125.1.dimacs (coloration du graphe r125.1 avec - son nombre chromatique - 5 couleurs)
+	* examples/satexample.dimacs
+
+
+* UNSAT
+	* examples/r125.1\_4.dimacs	(coloration du graphe r125.1 avec 4 couleurs)
+	* examples/unsatexample.dimacs
 
 ### Améliorations
 
-Résolvante de Robinson :
-	- heuristique pour la recherche des clauses à réduire
-	- parallélisation 
+* Etape de grouding 
+* Résolvante de Robinson :
+	* heuristique pour la recherche des clauses à réduire
+	* parallélisation 
 

@@ -34,7 +34,8 @@ Appliquer DLL:
 
 ### Améliorations
 
-* Etape de grounding 
+* DLL :
+	* heuristique pour choisir le littéral
 * Résolvante de Robinson :
 	* heuristique pour la recherche des clauses à réduire
 	* parallélisation 

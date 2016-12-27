@@ -32,7 +32,7 @@ int main (int argc, char * argv [])
 		else
 			if ( mode == "--dll" )
 			{
-				std::cout << Solver::DLL (c) << std::endl;
+				std::cout << SAT->DLL () << std::endl;
 			}
 
 		delete SAT;

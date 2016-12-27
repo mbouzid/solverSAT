@@ -9,8 +9,8 @@
 #include <random>
 #include <iterator>
 #include <unistd.h>
+#include <map>
 
-#include <thread>
 #include "solverException.h"
 
 class Solver
@@ -18,9 +18,9 @@ class Solver
 	private:
 		
 		Clauses m_clauses;
-		std::set < Variable > m_variables;
+		std::map < Variable, size_t > m_variables;
 
-		Solver (const Clauses & clauses, const std::set <Variable> & variables);
+		Solver (const Clauses & clauses, const std::map <Variable, size_t> & variables);
 
 	public:
 		
@@ -30,8 +30,8 @@ class Solver
 			return m_clauses;
 		}
 		static std::string Robinson (Clauses & S);	
-		static std::string DLL (Clauses & S);
-		const std::set < Variable > & getVariables () const
+		std::string DLL ();
+		const std::map < Variable, size_t > & getVariables () const
 		{
 			return m_variables;
 		}

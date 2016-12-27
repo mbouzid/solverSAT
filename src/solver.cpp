@@ -69,14 +69,14 @@ std::string Solver::Robinson (Clauses & S)
 		std::cout << "res=" << result << std::endl;
 		resolvents.insert(result);
 			
-		std::cout << resolvents << std::endl;
+		//std::cout << resolvents << std::endl;
 	}
 	
 	return "unsatisfiable";
 }
 
 
-Solver::Solver (const Clauses & clauses, const std::set < Variable > & variables):
+Solver::Solver (const Clauses & clauses, const std::map < Variable, size_t > & variables):
 	m_clauses (clauses),
 	m_variables (variables)
 {}
@@ -88,7 +88,7 @@ Solver * Solver::importFromDimacs (const char * filename) throw (SolverException
 	if ( f )
 	{
 		Clauses clauses	;
-		std::set < Variable > variables; 
+		std::map < Variable, size_t > variables; 
 
 		std::string line;
 		std::getline (f,line); // saut première ligne
@@ -113,13 +113,16 @@ Solver * Solver::importFromDimacs (const char * filename) throw (SolverException
 				Variable x (id);
 				Literal l (x, neg);
 
-				variables.insert (x);
+				if ( variables.find (x) != variables.end() )
+					variables[x] = variables[x] + 1;
+				else
+					variables [x] = 0;
 				c.insert(l);
 				
 			}
 				clauses. insert (c);
 		}
-	
+			
 		f.close();
 
 		return new Solver (clauses, variables);
@@ -128,24 +131,24 @@ Solver * Solver::importFromDimacs (const char * filename) throw (SolverException
 		throw SolverException ("cannot read the input file");
 }
 
-std::string Solver::DLL (Clauses & S)
+std::string Solver::DLL ()
 {
 	bool continuer (true);
 	while (continuer)
 	{
 
-		if ( S.empty() )
+		if ( m_clauses.empty() )
 		{
 			return "satisfiable";
 		}//end if
 		
 		// check empty clause []
-		if ( S.hasEmptyClause() )
+		if ( m_clauses.hasEmptyClause() )
 			return "unsatisfiable";
 
 		// check if [_l] and [l] exists
-		Clauses::iterator foundUnit = S.find_if (Clause::isUnit);
-		if ( S.exists (foundUnit) )
+		Clauses::iterator foundUnit = m_clauses.find_if (Clause::isUnit);
+		if ( m_clauses.exists (foundUnit) )
 		{
 			Clause c (*foundUnit);
 			Literal l (c.getFirst());
@@ -156,17 +159,17 @@ std::string Solver::DLL (Clauses & S)
 				return ( Clause::isUnit(c) and c.contains (_l));	
 			};
 
-			auto found = S.find_if (clauseWithConjugate);
-			if (S.exists (found))
+			auto found = m_clauses.find_if (clauseWithConjugate);
+			if (m_clauses.exists (found))
 				return "unsatisfiable";
 		}
 	
 		continuer = false;
 
 
-		Clauses::iterator foundUnitClause = S.find_if (Clause::isUnit);
+		Clauses::iterator foundUnitClause = m_clauses.find_if (Clause::isUnit);
 		
-		if ( S.exists(foundUnitClause) )
+		if ( m_clauses.exists(foundUnitClause) )
 		{
 			Clause UnitClause (*foundUnitClause);
 			Literal l (UnitClause.getFirst());
@@ -182,26 +185,35 @@ std::string Solver::DLL (Clauses & S)
 				return ( c.contains (_l) );
 			};
 
-			Clauses matchesWithoutLiterals (S.getMatches (clauseWithoutLiterals));
-			Clauses matchesWithConjugate (S.getMatches (clauseWithConjugate));
+			Clauses matchesWithoutLiterals (m_clauses.getMatches (clauseWithoutLiterals));
+			Clauses matchesWithConjugate (m_clauses.getMatches (clauseWithConjugate));
 
 			matchesWithConjugate = matchesWithConjugate/_l;
 
-			S = matchesWithoutLiterals + matchesWithConjugate;
+			m_clauses = matchesWithoutLiterals + matchesWithConjugate;
 			
 			continuer = true;		
 		}
 		else 
-		if ( S.hasPureLiteral() )
+		if ( m_clauses.hasPureLiteral() )
 		{
 			
-			Literal l (*S.getPureLiteral());		
-			S = S/l;
+			Literal l (*m_clauses.getPureLiteral());		
+			m_clauses = m_clauses/l;
 			continuer = true;
 		}
 	}
+	auto maxOcc = [] (const std::pair < Variable, size_t > & p1, const std::pair < Variable, size_t > & p2 )
+	{
+		return ( p1.second > p2.second);
+	};
+	std::vector < std::pair < Variable, size_t > > vars (m_variables.begin(), m_variables.end());
+
+	std::sort(vars.begin(), vars.end(), maxOcc);
 	
-	Literal l ((*S.begin()).getFirst());
+	Variable x (vars[0].first);
+
+	Literal l (x) ;
 	Literal _l = *l;
 
 	auto withl = [&l] (const Clause & c) 
@@ -214,32 +226,58 @@ std::string Solver::DLL (Clauses & S)
 		return ( c.contains (_l) );
 	};
 
-	Clauses S_l (S.getMatches (withl) );
-	Clauses S__l (S.getMatches (with_l));
+	Clauses S_l (m_clauses.getMatches (withl) );
+	Clauses S__l (m_clauses.getMatches (with_l));
 		
 	auto clauseWithoutLiterals = [&l,&_l] (const Clause & c)
 	{
 		return ( !c.contains (l) and !c.contains (_l) );
 	};
 	
-	Clauses withoutl (S.getMatches (clauseWithoutLiterals));
-	
+	Clauses withoutl (m_clauses.getMatches (clauseWithoutLiterals));
+		
+	std::map < Variable, size_t > vars1, vars2;
+
+		
 	Clauses case1 = (S__l/_l);
 	case1 = case1 + withoutl ;
+	for (auto cl : case1)	
+	{
+		for (auto lit : cl)
+		{
+			if ( vars1.find (lit.getVar()) != vars1.end()) 
+				vars1 [lit.getVar()] = vars1[lit.getVar()]+1;
+			else
+				vars1 [lit.getVar()] = 0;
+		}
+	}
+
 	Clauses case2 = (S_l/l);
 	case2 = case2 + withoutl;
-	
+	for (auto cl : case2)	
+	{
+		for (auto lit : cl)
+		{
+			if ( vars2.find ( lit.getVar()) != vars2.end() ) 
+				vars2 [lit.getVar()] = vars2[lit.getVar()]+1;
+			else
+				vars2 [lit.getVar()] = 0;
+		}
+	}
 	std::cout << "case1:" << std::endl;
 	std::cout << "\t" << case1.size() << std::endl;
 	
 	std::cout << "case2:" << std::endl;
 	std::cout << "\t" << case2.size() << std::endl;
+	
 
+	Solver s1 (case1, vars1);
+	Solver s2 (case2, vars2);
 
-	if ( (DLL (case1) == "satisfiable") or ( DLL  (case2) == "satisfiable" ) )
-		return "satisfiable";
-	else
-		return "unsatisfiable";
+	if ( (s1.DLL () == "satisfiable") or ( s2.DLL  () == "satisfiable" ) )
+			return "satisfiable";
+		else
+			return "unsatisfiable";
 }
 
 

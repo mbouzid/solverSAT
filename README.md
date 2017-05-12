@@ -3,6 +3,9 @@ Solver SAT basé sur la méthode de Davis, Logemann et Loveland; inclu la résol
 
 ### Installation
 
+`mkdir obj; mkdir build
+`
+
 `
 make -s
 `
